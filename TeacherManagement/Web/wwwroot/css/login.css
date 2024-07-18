@@ -1,0 +1,16 @@
+
+main{
+    display:flex;
+    justify-content: end;
+}
+
+    main > .login-content {
+        width: 25%;
+        background-color: white;
+        padding: 16px;
+        height: 100%;
+        position: fixed;
+        padding-top: 5%;
+        padding-left: 64px;
+        padding-right: 64px;
+    }

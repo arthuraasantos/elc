@@ -1,0 +1,44 @@
+﻿
+@model Web.Models.Users.RegisterViewModel
+@{
+}
+
+<link href="~/css/login.css" rel="stylesheet" />
+
+<div class="login-content">
+    <div class="login-container">
+        <p>Crie sua conta para gerenciar seus alunos e documentos com a nossa aplicação.</p>
+        <form class="pt-5" method="post" asp-action="Register">
+            <div class="row">
+                <div class="col">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="Name" class="control-label"></label>
+                    <input asp-for="Name" class="form-control" />
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    <button class="btn btn-primary" type="submit">
+                        Entrar
+                        <i class="fa-solid fa-user"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>

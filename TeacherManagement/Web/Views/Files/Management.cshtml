@@ -1,0 +1,46 @@
+﻿@model Web.Models.Files.FileManagementModel
+@{
+}
+
+<style>
+    .table > tbody > tr > td {
+        line-height: 40px;
+    }
+
+    .combined-name{
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+</style>
+
+<table class="table">
+    <thead>
+        <tr class="">
+            <th colspan="2"></th>
+            <th colspan="6">Name</th>
+            <th colspan="4">Operações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Files)
+        {
+            <tr>
+                <td colspan="2">Thumb</td>
+                <td colspan="6">
+                    <div class="combined-name">
+                        <span>@item.Name</span>
+                        <small>@item.Id</small>
+                    </div>
+                </td>
+                <td colspan="4">
+                    <button class="btn btn-primary">Visualizar</button>
+                    <button class="btn btn-primary">Editar</button>
+                    <button class="btn btn-primary">Download</button>
+                    <button class="btn btn-primary">Download PDF</button>
+                    <button class="btn btn-danger">Excluir</button>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

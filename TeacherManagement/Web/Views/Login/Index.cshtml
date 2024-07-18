@@ -1,0 +1,43 @@
+﻿@model Web.Models.Users.LoginViewModel
+@{
+}
+<link href="~/css/login.css" rel="stylesheet" />
+
+<div class="login-content">
+    <div class="login-container">
+        <img src="~/images/logo.svg" class="logo" />
+        <form class="pt-5" method="post" asp-action="Login">
+            <div class="row">
+                <div class="col">
+                    <label asp-for="Email" class="control-label"></label>
+                    <input asp-for="Email" class="form-control" />
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label asp-for="Password" class="control-label"></label>
+                    <input asp-for="Password" class="form-control" />
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col">
+                    
+                    <button class="btn btn-primary" type="submit">
+                        Entrar
+                        <i class="fa-solid fa-user"></i>
+                    </button>
+
+                    
+                </div>
+            </div>
+            <div class="row mt-2">
+                <div class="col">
+                    <a href="~/Login/Register">Criar conta</a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+</div>
