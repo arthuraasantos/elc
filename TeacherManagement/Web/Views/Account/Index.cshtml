@@ -5,8 +5,15 @@
 
 <div class="login-content">
     <div class="login-container">
+
         <img src="~/images/logo.svg" class="logo" />
         <form class="pt-5" method="post" asp-action="Login">
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-danger mt-3">
+                    @ViewBag.Message
+                </div>
+            }
             <div class="row">
                 <div class="col">
                     <label asp-for="Email" class="control-label"></label>
@@ -32,9 +39,12 @@
                     
                 </div>
             </div>
+            
+            
+
             <div class="row mt-2">
                 <div class="col">
-                    <a href="~/Login/Register">Criar conta</a>
+                    <a href="~/Account/Register">Criar conta</a>
                 </div>
             </div>
         </form>

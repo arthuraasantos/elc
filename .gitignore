@@ -54,3 +54,9 @@ dkms.conf
 /TeacherManagement/.vs/TeacherManagement
 /TeacherManagement/Web/bin/Debug/net8.0
 /TeacherManagement/Web/obj
+/TeacherManagement/.vs/ProjectEvaluation
+/TeacherManagement/Application/bin/Debug/net8.0
+/TeacherManagement/Application/obj
+/TeacherManagement/Infra/bin/Debug/net8.0
+/TeacherManagement/Infra/obj
+/TeacherManagement/Web/wwwroot/uploads

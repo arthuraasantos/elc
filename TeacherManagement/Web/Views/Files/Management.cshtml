@@ -12,35 +12,67 @@
         flex-direction: column;
         justify-content: flex-start;
     }
+
+    .my-files-container{
+        padding-top: 32px;
+    }
 </style>
 
-<table class="table">
-    <thead>
-        <tr class="">
-            <th colspan="2"></th>
-            <th colspan="6">Name</th>
-            <th colspan="4">Operações</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model.Files)
-        {
-            <tr>
-                <td colspan="2">Thumb</td>
-                <td colspan="6">
-                    <div class="combined-name">
-                        <span>@item.Name</span>
-                        <small>@item.Id</small>
-                    </div>
-                </td>
-                <td colspan="4">
-                    <button class="btn btn-primary">Visualizar</button>
-                    <button class="btn btn-primary">Editar</button>
-                    <button class="btn btn-primary">Download</button>
-                    <button class="btn btn-primary">Download PDF</button>
-                    <button class="btn btn-danger">Excluir</button>
-                </td>
+
+
+<form asp-action="UploadFile" asp-controller="Files" method="post" enctype="multipart/form-data">
+    <h3>Novos arquivos</h3>
+    <div class="row">
+        <div class="col-4">
+            <div class="form-group mb-2">
+                <input type="file" class="form-control" id="file" name="NewFiles" />
+            </div>
+            <button type="submit" name="submit" value="Upload" class="btn btn-primary">Submeter</button>
+        </div>
+    </div>
+</form>
+@if (ViewBag.Message != null)
+{
+    <div class="alert mt-3">
+        @ViewBag.Message
+    </div>
+}
+<div class="my-files-container">
+    <h3>Meus arquivos</h3>
+    <table class="table">
+        <thead>
+            <tr class="">
+                <th colspan="2"></th>
+                <th colspan="5">Name</th>
+                <th colspan="1">Tamanho</th>
+                <th colspan="4">Operações</th>
             </tr>
-        }
-    </tbody>
-</table>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Files)
+            {
+                <tr>
+                    <td colspan="2">Thumb</td>
+                    <td colspan="5">
+                        <div class="combined-name">
+                            <span>@item.OriginalName  </span>
+                            
+                            <small>@item.Id</small>
+                        </div>
+                    </td>
+                    <td colspan="1">
+                        <span>@item.Size KB</span>
+                    </td>
+                    <td colspan="4">
+                        <button class="btn btn-primary">Visualizar</button>
+                        <button class="btn btn-primary">Editar</button>
+                        <button class="btn btn-primary">Download</button>
+                        <button class="btn btn-primary">Download PDF</button>
+                        <button class="btn btn-danger">Excluir</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+</div>
