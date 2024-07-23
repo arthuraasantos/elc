@@ -1,7 +1,6 @@
 ﻿using Core.Entities.Files;
 using Infra.Contexts;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
 
 namespace Infra.Repositories
 {

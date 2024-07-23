@@ -1,4 +1,3 @@
-using Core.Entities.Files.FileDataExtractTypes;
 using Core.Services;
 
 namespace Core.Tests.Grades
@@ -19,16 +18,5 @@ namespace Core.Tests.Grades
 
             Assert.Equal(expectedAverage, averageResult);
         }
-
-       
-
-
-
-
-
-
-
-
-
     }
 }

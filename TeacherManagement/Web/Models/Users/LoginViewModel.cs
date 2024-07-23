@@ -4,11 +4,11 @@ namespace Web.Models.Users
 {
     public class LoginViewModel
     {
-        [Required]
+        [Required(ErrorMessage = "Preencha o campo e-mail")]
         [EmailAddress]
         public string Email { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Preencha o campo senha")]
         [DataType(DataType.Password)]
         public string Password { get; set; }
     }
