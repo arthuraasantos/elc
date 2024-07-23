@@ -1,21 +1,73 @@
-﻿@model Web.Models.Files.FileManagementModel
+﻿@using System.Globalization
+@model Web.Models.Files.FileManagementModel
 @{
+    var cultureInfo = new CultureInfo("pt-PT");
 }
 
 <style>
     .table > tbody > tr > td {
         line-height: 40px;
+        vertical-align: middle;
     }
 
     .combined-name{
         display: flex;
         flex-direction: column;
         justify-content: flex-start;
+        line-height: 24px;
     }
 
     .my-files-container{
         padding-top: 32px;
     }
+
+    .thumb{
+        border-radius: 4px;
+        width: 100px;
+        height: 70px;
+    }
+
+    .header-teacher{
+        color: white;
+    }
+
+    .header-numbers{
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+
+    .header-numbers > .badge{
+        display: flex;
+        flex-direction: column;
+    }
+
+    .badge > .number {
+        font-size: 24px;
+        font-weight: bold;
+    }
+
+    .best-student{
+        background-color: #a0d777;
+        color: black;
+    }
+
+    .best-student > td{
+        font-size: 15px;
+        font-weight: bolder;
+    }
+
+    #table-file-data {
+        height: 500px;
+        margin-bottom: 16px;
+        overflow-y: scroll;
+    }
+
+    .bg-success{
+        background-color: #a0d777 !important;
+    }
+
 </style>
 
 
@@ -43,36 +95,246 @@
         <thead>
             <tr class="">
                 <th colspan="2"></th>
-                <th colspan="5">Name</th>
+                <th colspan="4">Name</th>
+                <th colspan="1">Downloads</th>
                 <th colspan="1">Tamanho</th>
-                <th colspan="4">Operações</th>
+                <th colspan="1">Carregado em</th>
+                <th colspan="3">Operações</th>
             </tr>
         </thead>
         <tbody>
             @foreach (var item in Model.Files)
             {
                 <tr>
-                    <td colspan="2">Thumb</td>
-                    <td colspan="5">
+                    <td colspan="2">
+                        @if (item.Data != null && item.Data.Thumbnail != null && item.Data.Thumbnail.Length > 0)
+                        {
+                            var base64Thumb = Convert.ToBase64String(item.Data.Thumbnail);
+                            <img class="thumb border border-secondary" src="data:image/png;base64, @base64Thumb"  alt="Thumbnail" />
+                        }
+                        else
+                        {
+                            <span>SEm thumb</span>
+                        }
+                    </td>
+                    <td colspan="4">
                         <div class="combined-name">
-                            <span>@item.OriginalName  </span>
-                            
+
+                            @if (!string.IsNullOrEmpty(item.Description))
+                            {
+                                <span>
+                                    <span class="fw-bold">@item.Description</span>
+                                </span>
+                            }
+                            <small>Nome original: @item.OriginalName </small>
                             <small>@item.Id</small>
                         </div>
                     </td>
                     <td colspan="1">
+                        <span>@item.Downloads</span>
+                    </td>
+                    <td colspan="1">
                         <span>@item.Size KB</span>
                     </td>
+                    <td colspan="1">
+                        <div class="combined-name">
+                            <span>@item.CreatedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</span>
+                            <span class="fs-12">Enviado por: <strong>@item.CreatedUser</strong></span>
+                        </div>
+                    </td>
                     <td colspan="4">
-                        <button class="btn btn-primary">Visualizar</button>
-                        <button class="btn btn-primary">Editar</button>
-                        <button class="btn btn-primary">Download</button>
-                        <button class="btn btn-primary">Download PDF</button>
-                        <button class="btn btn-danger">Excluir</button>
+                        <button class="btn btn-outline-primary btnViewFile"
+                                data-bs-id="@item.Id"
+                                data-bs-toggle="modal"
+                                data-bs-target="#viewFileDataModal">
+                            Visualizar
+                        </button>
+                        <button class="btn btn-outline-primary btnEditModal"
+                                data-bs-id="@item.Id"
+                                data-bs-originalname="@item.OriginalName"
+                                data-bs-toggle="modal"
+                                data-bs-target="#editModal">
+                            Editar
+                        </button>
+                        <a asp-controller="Files" asp-action="DownloadFile" asp-route-fileId="@item.Id" class="btn btn-outline-primary">
+                            Download 
+                        </a>
+                        <a asp-controller="Files" asp-action="DownloadPDFFile" asp-route-fileId="@item.Id" class="btn btn-outline-primary btnDownloadPdf">
+                            Download PDF
+                        </a>
+                        <a asp-controller="Files" asp-action="RemoveFile" asp-route-fileId="@item.Id" class="btn btn-outline-danger">
+                            Excluir
+                        </a>
                     </td>
                 </tr>
             }
+
+            @if(Model.Files == null || Model.Files.Count == 0)
+            {
+                <tr>
+                    <td colspan="4">Sem arquivos</td>
+                </tr>
+            }
+
         </tbody>
     </table>
 
 </div>
+
+<!-- Modal Edit file -->
+<div class="modal fade" id="editModal" tabindex="-1" aria-labelledby="editModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel">Editar arquivo</h5>
+                <button type="button" class="btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="editFile" method="post" asp-action="EditFile">
+                    <div class="form-group">
+                        <label for="FileDescription">Descrição</label>
+                        <input type="text" class="form-control" id="FileDescription" name="FileDescription" required>
+                    </div>
+                    <input type="hidden" id="FileId" name="FileId">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+                <button type="button" class="btn btn-primary" id="saveFile">Salvar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- Modal View file -->
+<div class="modal fade" id="viewFileDataModal" tabindex="-1" aria-labelledby="viewFileLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewFileLabel">Dados do arquivo</h5>
+                <button type="button" class="btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+                <div class="file-header">
+                    <div class="header-numbers">
+                        <span class="badge bg-primary">
+                            <span class="number" id="average"></span>
+                            <small>Média geral da sala</small>
+                        </span>
+                        <span class="badge bg-primary mx-2">
+                            <span class="number" id="approval-average"></span>
+                            <small>Aprovações na sala</small>
+                        </span>
+                    </div>
+                </div>
+                <div class="row my-3">
+                    <div class="col-2">
+                        <span class="badge bg-success">Aluno destaque</span>
+                    </div>
+                    <div class="col-6">
+                        <small>A linha verde destaca o aluno com a melhor média.</small>
+                    </div>
+                </div>
+               <div id="table-file-data">
+               </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fechar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="~/lib/popperjs/popper.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
+
+<script>
+    $(document).ready(function () {
+
+        // Edit file 
+        $('.btnEditModal').on('click', function () {
+            
+            let fileId = $(this).attr('data-bs-id');
+            let fileDescription = $(this).attr('data-bs-description');
+            let fileThumb = $(this).attr('data-bs-thumb');
+            let fileOriginalName = $(this).attr('data-bs-originalname');
+            
+
+            $('#FileId').val(fileId);
+            $('#FileDescription').val(fileDescription?.length > 0 ? fileDescription : fileOriginalName);
+
+            $('#editModal').modal('show');
+        });
+
+        $('#saveFile').on('click', function () {
+            $('#editFile').submit();
+        });
+
+
+        // View file
+        $('.btnViewFile').on('click', function () {
+
+            let fileId = $(this).attr('data-bs-id');
+            
+            $.ajax({
+                url: '/Files/GetClassFileData',
+                type: 'GET',
+                data: { fileId: fileId },
+                success: function (data) {
+                    console.log('ajax response', data);
+                    $("#approval-average").text(`${data.approvalPercentage}%`);
+                    $("#average").text(`${data.average}`);
+                    buildStudentsTable(data);
+                }
+            });
+
+            $('#viewFileDataModal').modal('show');
+        });
+
+        function buildStudentsTable(data) {
+
+            let teacher = data.teacher;
+            let subject = data.subject;
+            let table = '<table class="table">';
+
+            table += '<thead>';
+            table += '<tr class="bg-primary header-teacher"><th colspan="5">Professor: ' + teacher + '</th><th colspan = "2">Matéria: ' + subject + '</th></tr>';
+            table += '<tr class="bg-primary header-teacher"><th>ID</th><th>Aluno</th><th>Nota1</th><th>Nota2</th><th>Nota3</th><th>Nota4</th><th>Média final</th></tr>';
+            table += '</thead>';
+            
+            table += '<tbody>';
+
+            data.students.forEach(student => {
+                let isBestStudent = student.id === data.bestStudentId;
+                let bestStudentClass = isBestStudent ? 'best-student' : '';
+                console.log('student', isBestStudent);
+
+                table += `<tr class="${bestStudentClass}">`;
+                table += `<td>${student.id}</td>`;
+                table += `<td>${student.name}</td>`;
+                table += `<td>${student.grade1}</td>`;
+                table += `<td>${student.grade2}</td>`;
+                table += `<td>${student.grade3}</td>`;
+                table += `<td>${student.grade4}</td>`;
+                table += `<td><strong>${student.gradeAverage}</strong></td>`;
+                table += '</tr>';
+            });
+
+            table += '</tbody></table>';
+            $('#table-file-data').html(table);
+        }
+
+
+        $('.btnDownloadPdf').on('click', function () {
+            $('#loadingIndicator').show();
+        });
+
+    });
+</script>

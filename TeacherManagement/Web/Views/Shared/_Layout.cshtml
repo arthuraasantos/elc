@@ -3,6 +3,11 @@
 @inject SignInManager<AppUser> SignInManager
 @inject UserManager<AppUser> UserManager
 
+@{
+    var isAuthenticated = SignInManager.IsSignedIn(User);
+    var containerClass = isAuthenticated ? "container" : "";
+}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -15,7 +20,7 @@
 </head>
 <body>
     <header>
-        @if (SignInManager.IsSignedIn(User))
+        @if (isAuthenticated)
         {
             <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
                 <div class="container-fluid">
@@ -41,16 +46,56 @@
             </nav>
         }
     </header>
-    <div class="container">
+    <div class="@containerClass">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>
     </div>
+    <div id="loading-container">
+        <div id="loadingIndicator">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only"></span>
+            </div>
+        </div>
+    </div>
+    
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="~/lib/popperjs/popper.min.js"></script>
+    
+    <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+
+        window.addEventListener('beforeunload', function () {
+            console.log('beforeunload');
+            $('#loadingIndicator').show();
+        });
+
+        $(document).ready(function () {
+            
+            $(document).ajaxStart(function () {
+                $('#loadingIndicator').show();
+            });
+
+            
+            $(document).ajaxStop(function () {
+                $('#loadingIndicator').hide();
+            });
+
+            
+            $(window).on('load', function () {
+                $('#loadingIndicator').hide();
+                console.log('after loading');
+            });
+        });
+
+        
+    </script>
+
+    
 </body>
 </html>

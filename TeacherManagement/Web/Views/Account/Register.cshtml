@@ -9,6 +9,17 @@
     <div class="login-container">
         <p>Crie sua conta para gerenciar seus alunos e documentos com a nossa aplicação.</p>
         <form class="pt-5" method="post" asp-action="Register">
+            @if (ViewBag.Message != null)
+            {
+                <div class="alert alert-danger">
+                    @ViewBag.Message
+                </div>
+            }
+            <div class="row">
+                <ul class="mx-3">
+                    <li>O campo Name deve conter apenas letras e números.</li>
+                </ul>
+            </div>
             <div class="row">
                 <div class="col">
                     <label asp-for="Email" class="control-label"></label>

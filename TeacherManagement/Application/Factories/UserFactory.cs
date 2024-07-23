@@ -6,7 +6,9 @@ namespace Core.Factories
     {
         public static AppUser Create(string name, string email)
         {
-            return new AppUser(name, email)
+            var treatedName = name.Replace(".", string.Empty);
+
+            return new AppUser(treatedName, email)
             {
             };
         }

@@ -47,3 +47,35 @@ main > .container{
     padding: 32px;
     margin: auto;
 }
+
+
+#loadingIndicator {
+    display: block;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+   
+}
+
+#loading-container {
+    display: none;
+    position: fixed;
+    height: 100%;
+    width: 100%;
+    background-color: rgb(47 46 46 / 80%);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
+.spinner-border {
+    width: 6rem !important;
+    height: 6rem !important;
+}
+
+.fs-12{
+    font-size: 12px !important;
+}

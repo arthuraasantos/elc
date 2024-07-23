@@ -16,7 +16,7 @@ namespace Infra.Repositories
 
         protected DbSet<T> Repository => Context.Set<T>();
 
-        protected IQueryable<T> All(bool includeDeleted = false)
+        protected virtual IQueryable<T> All(bool includeDeleted = false)
         {
             Func<T, bool> baseEntries = (entity) => includeDeleted || !entity.DeletedAt.HasValue;
 

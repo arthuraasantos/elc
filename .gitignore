@@ -60,3 +60,10 @@ dkms.conf
 /TeacherManagement/Infra/bin/Debug/net8.0
 /TeacherManagement/Infra/obj
 /TeacherManagement/Web/wwwroot/uploads
+/TeacherManagement/Core.Tests/bin/Debug/net8.0
+/TeacherManagement/Core.Tests/obj
+/TeacherManagement/Application/bin/Release/net8.0
+/TeacherManagement/Core.Tests/bin/Release/net8.0
+/TeacherManagement/Infra/bin/Release/net8.0
+/TeacherManagement/Web/bin/Release/net8.0
+/TeacherManagement/Web/Properties/PublishProfiles

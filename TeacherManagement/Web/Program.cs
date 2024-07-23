@@ -4,11 +4,19 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using Core.Entities.Files;
 using Infra.Repositories;
+using Core.Services;
+using Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddDbContext<TMContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection")));
+builder.Services.AddDbContext<TMContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("SQLConnection")), ServiceLifetime.Scoped);
+
+builder.Services.AddScoped<IUnitofWork, UnitofWork>();
 builder.Services.AddScoped<IMyFileRepository, FileRepository>();
+builder.Services.AddScoped<IClassService, ClassService>();
+builder.Services.AddScoped<IFileService, FileService>();
+builder.Services.AddScoped<IGradeService, GradeService>();
+
 
 builder.Services.AddDefaultIdentity<AppUser>(options =>
 {
@@ -20,6 +28,11 @@ builder.Services.AddDefaultIdentity<AppUser>(options =>
     options.Password.RequiredLength = 4;
 
 }).AddRoles<IdentityRole<Guid>>().AddEntityFrameworkStores<TMContext>();
+
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.LoginPath = "/Account/Index";
+});
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -40,6 +53,6 @@ app.UseAuthorization();
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Account}/{action=Index}/{id?}");
+    pattern: "{controller=Home}/{action=Index}/{id?}");
 
 app.Run();

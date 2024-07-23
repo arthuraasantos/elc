@@ -7,12 +7,14 @@ namespace Core.Entities.Files
     {
         public string OriginalName { get; set; }
         public string? Description { get; set; }
-        public string? Thumbnail { get; set; }
+        
         public long Size { get; set; }
+        public string Extension { get; set; }
         public int Downloads { get; set; }
 
         public Guid OwnerId { get; set; }
         public AppUser Owner { get; set; }
+        public MyFileData? Data { get; set; } 
 
     }
 }

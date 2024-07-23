@@ -53,6 +53,8 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> Register(RegisterViewModel model)
         {
+            ViewBag.Message = null;
+
             if (ModelState.IsValid)
             {
                 var user = UserFactory.Create(model.Name, model.Email);
