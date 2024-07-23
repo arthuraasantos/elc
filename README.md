@@ -50,6 +50,7 @@ O projeto está dividido em 3 principais frentes:
 **Infra** - Camada de infraesturutura, gerenciamento de informações e relação com acesso à dados. 
 **Core** - Camada com as lógicas importantes para o negócio. A ideia é que aqui estejam centralizadas as regras de negócio,
 interfaces, serviços e classes que podem ser compartilhadas ao longo do sistema.
+**Core.Tests** - Projeto de testes unitários, com os testes relacionados as lógicas da camada **Core**
 
 
 
