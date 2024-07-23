@@ -2,6 +2,8 @@
 using Core.Entities.Files;
 using Core.Entities.Files.FileDataExtractTypes;
 using DocumentFormat.OpenXml.Spreadsheet;
+using GemBox.Spreadsheet;
+using Microsoft.AspNetCore.StaticFiles;
 using Newtonsoft.Json;
 using SkiaSharp;
 
@@ -57,7 +59,9 @@ namespace Core.Services
             
             var teacherRow = worksheet.RowsUsed().First();
             var teacherCell = teacherRow.FirstCell();
-            gradeStudentFileData.Teacher = teacherCell.Value.ToString();
+
+            const string TEACHER_PREFIX = "Professor: ";
+            gradeStudentFileData.Teacher = teacherCell.Value.ToString().Replace(TEACHER_PREFIX, string.Empty);
 
             foreach (var row in worksheet.RowsUsed().Skip(TITLE_LINES_TO_SKIP))
             {
@@ -150,5 +154,51 @@ namespace Core.Services
 
             return imageStream.ToArray();
         }
+
+        public string GetFileExtension(string fileName)
+        {
+            string[] fileNameParts = fileName.Split('.');
+
+            string lastPart = fileNameParts[fileNameParts.Length - 1];
+
+            return lastPart;
+        }
+
+        public string GetFileContentType(string fileName)
+        {
+            var provider = new FileExtensionContentTypeProvider();
+
+            if (!provider.TryGetContentType(fileName, out var contentType))
+                contentType = "application/octet-stream";
+
+            return contentType;
+        }
+
+        public string GetPdfFromXLS(MyFile file, string userUploadFolderPath, string excelToDownload)
+        {
+            string pdfFileName = Path.Combine(userUploadFolderPath, $"{file.Id}.pdf");
+
+            if (!File.Exists(pdfFileName))
+            {
+                SpreadsheetInfo.SetLicense("FREE-LIMITED-KEY");
+
+                using (var workbook = new XLWorkbook(excelToDownload))
+                {
+                    using (var stream = new MemoryStream())
+                    {
+                        workbook.SaveAs(stream);
+                        stream.Position = 0;
+
+                        var excelFile = ExcelFile.Load(stream);
+
+                        excelFile.Save(pdfFileName);
+                    }
+                }
+            }
+
+            return pdfFileName;
+        }
+
+
     }
 }

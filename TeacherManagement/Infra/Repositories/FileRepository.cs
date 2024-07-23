@@ -16,6 +16,7 @@ namespace Infra.Repositories
         {
             var userFiles = All(false)
                 .Where(a => a.OwnerId == userId)
+                .OrderByDescending(a => a.CreatedAt)
                 .ToList();
 
             return await Task.FromResult(userFiles);

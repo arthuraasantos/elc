@@ -13,6 +13,7 @@ using Infra;
 using ClosedXML.Excel;
 using IronXL;
 using GemBox.Spreadsheet;
+using Web.Adapters;
 
 namespace Web.Controllers
 {
@@ -36,14 +37,8 @@ namespace Web.Controllers
         {
             var currentUser = await _identityUserManager.GetUserAsync(User);
             var userFiles = await _fileRepository.GetUserFiles(currentUser!.Id);
-
-            var viewModel = new FileManagementModel()
-            {
-                Files = new List<MyFile>()
-            };
-
-            viewModel.Files.AddRange(userFiles.OrderByDescending(f => f.CreatedAt));
-
+            
+            var viewModel = FileAdapter.ToManagementModel(userFiles);
 
             return View(viewModel);
         }
@@ -51,13 +46,24 @@ namespace Web.Controllers
         [HttpPost]
         public async Task<IActionResult> UploadFile(FileManagementModel fileManagementModel)
         {
+            const long UPLOAD_LIMIT_MB = 5;
             if (fileManagementModel.NewFiles != null && fileManagementModel.NewFiles.Length > 0)
             {
+                var uploadedFileKBLength = fileManagementModel.NewFiles.Length / 1024;
+                var uploadedFileMBLength = uploadedFileKBLength / 1024;
+                
+                if (UPLOAD_LIMIT_MB < uploadedFileMBLength)
+                {
+                    TempData["Message"] = "O limte do arquivo é 5MB.";
+
+                    return RedirectToAction("Management");
+                }
+
                 var user = await _identityUserManager.GetUserAsync(User);
 
                 if (user == null)
                 {
-                    ViewBag.Message = "File upload failed!";
+                    TempData["Message"] = "Erro ao fazer upload";
 
                     return RedirectToAction("Management");
                 }
@@ -66,13 +72,13 @@ namespace Web.Controllers
                 if (!Directory.Exists(userUploadFolderPath))
                     Directory.CreateDirectory(userUploadFolderPath);
 
-                var fileExtension = GetFileExtension(fileManagementModel.NewFiles.FileName);
+                var fileExtension = _fileService.GetFileExtension(fileManagementModel.NewFiles.FileName);
 
                 var file = new MyFile()
                 {
                     Id = Guid.NewGuid(),
                     OriginalName = fileManagementModel.NewFiles.FileName,
-                    Size = fileManagementModel.NewFiles.Length / 1024,
+                    Size = uploadedFileKBLength,
                     Extension = fileExtension,
                     OwnerId = user.Id,
                 };
@@ -99,24 +105,13 @@ namespace Web.Controllers
 
                 await _fileRepository.UpdateAsync(file);
                 await _unitOfWork.CommitAsync();
-
-                ViewBag.Message = "File uploaded successfully!";
             }
             else
             {
-                ViewBag.Message = "File upload failed!";
+                TempData["Message"] = "Erro inesperado ao fazer o upload.";
             }
 
             return RedirectToAction("Management");
-        }
-
-        private string GetFileExtension(string fileName)
-        {
-            string[] fileNameParts = fileName.Split('.');
-
-            string lastPart = fileNameParts[fileNameParts.Length - 1];
-
-            return lastPart;
         }
 
         private static string GetUserFilesPath(Guid userId)
@@ -132,7 +127,6 @@ namespace Web.Controllers
             if (file == null) return View("Management");
 
             file.Description = editFileModel.FileDescription;
-            //file.Thumbnail = editFileModel.FileThumb;
 
             await _unitOfWork.CommitAsync();
 
@@ -154,17 +148,9 @@ namespace Web.Controllers
             string fileNameToDownload = $"{file.OriginalName}";
             var fileToDownload = Path.Combine(userUploadFolderPath, fileName);
 
-            if (!System.IO.File.Exists(fileToDownload))
-            {
-                return NotFound();
-            }
+            if (!System.IO.File.Exists(fileToDownload)) return NotFound();
 
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(fileName, out var contentType))
-            {
-                contentType = "application/octet-stream"; // Default to binary stream if unknown
-            }
-
+            var contentType = _fileService.GetFileContentType(fileName);
             var fileBytes = await System.IO.File.ReadAllBytesAsync(fileToDownload);
 
             file.Downloads++;
@@ -187,47 +173,23 @@ namespace Web.Controllers
             string fileName = $"{file.Id}.{file.Extension}";
             var excelToDownload = Path.Combine(userUploadFolderPath, fileName);
 
-            if (!System.IO.File.Exists(excelToDownload))
-            {
-                return NotFound();
-            }
+            if (!System.IO.File.Exists(excelToDownload)) return NotFound();
 
-            var provider = new FileExtensionContentTypeProvider();
-            if (!provider.TryGetContentType(fileName, out var contentType))
-            {
-                contentType = "application/octet-stream"; 
-            }
-
-            string pdfFileName = Path.Combine(userUploadFolderPath, $"{file.Id}.pdf");
-
-            if (!System.IO.File.Exists(pdfFileName))
-            {
-                SpreadsheetInfo.SetLicense("FREE-LIMITED-KEY");
-
-                using (var workbook = new XLWorkbook(excelToDownload))
-                {
-                    using (var stream = new MemoryStream())
-                    {
-                        workbook.SaveAs(stream);
-                        stream.Position = 0;
-
-                        var excelFile = ExcelFile.Load(stream);
-
-                        excelFile.Save(pdfFileName);
-                    }
-                }
-            }
+            var contentType = _fileService.GetFileContentType(fileName);
+            string pdfFileName = _fileService.GetPdfFromXLS(file, userUploadFolderPath, excelToDownload);
 
             file.Downloads++;
             await _unitOfWork.CommitAsync();
 
-            string extension = GetFileExtension(file.OriginalName);
+            string extension = _fileService.GetFileExtension(file.OriginalName);
             string fileNameToDownload = $"{file.OriginalName.Replace(extension, string.Empty)}.pdf";
 
             var fileBytes = await System.IO.File.ReadAllBytesAsync(pdfFileName);
 
             return File(fileBytes, contentType, fileNameToDownload);
         }
+
+        
 
         public async Task<IActionResult> RemoveFile(string fileId)
         {
@@ -248,7 +210,6 @@ namespace Web.Controllers
             if (!Guid.TryParse(fileId, out Guid fileIdConverted))
                 return NotFound();
 
-            var user = await _identityUserManager.GetUserAsync(User);
             var file = await _fileRepository.GetByIdAsync(fileIdConverted);
 
             if (file == null) return Json(null);

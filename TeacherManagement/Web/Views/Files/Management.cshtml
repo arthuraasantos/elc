@@ -1,7 +1,6 @@
 ﻿@using System.Globalization
 @model Web.Models.Files.FileManagementModel
 @{
-    var cultureInfo = new CultureInfo("pt-PT");
 }
 
 <style>
@@ -70,23 +69,21 @@
 
 </style>
 
-
-
 <form asp-action="UploadFile" asp-controller="Files" method="post" enctype="multipart/form-data">
     <h3>Novos arquivos</h3>
     <div class="row">
         <div class="col-4">
             <div class="form-group mb-2">
-                <input type="file" class="form-control" id="file" name="NewFiles" />
+                <input type="file" class="form-control" id="file" name="NewFiles" accept=".xls,.xlsx" />
             </div>
             <button type="submit" name="submit" value="Upload" class="btn btn-primary">Submeter</button>
         </div>
     </div>
 </form>
-@if (ViewBag.Message != null)
+@if (TempData["Message"] != null)
 {
-    <div class="alert mt-3">
-        @ViewBag.Message
+    <div class="alert alert-info mt-3">
+        @TempData["Message"]
     </div>
 }
 <div class="my-files-container">
@@ -111,10 +108,6 @@
                         {
                             var base64Thumb = Convert.ToBase64String(item.Data.Thumbnail);
                             <img class="thumb border border-secondary" src="data:image/png;base64, @base64Thumb"  alt="Thumbnail" />
-                        }
-                        else
-                        {
-                            <span>SEm thumb</span>
                         }
                     </td>
                     <td colspan="4">
@@ -172,7 +165,7 @@
             @if(Model.Files == null || Model.Files.Count == 0)
             {
                 <tr>
-                    <td colspan="4">Sem arquivos</td>
+                    <td colspan="12">Sem arquivos</td>
                 </tr>
             }
 
@@ -187,7 +180,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="editModalLabel">Editar arquivo</h5>
-                <button type="button" class="btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="btn btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
@@ -215,7 +208,7 @@
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewFileLabel">Dados do arquivo</h5>
-                <button type="button" class="btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
+                <button type="button" class="btn btn-outline-danger close" data-bs-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
